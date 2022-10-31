@@ -8,17 +8,21 @@ class Entry:
     def __init__(self,
                  cszo,  # sometimes there are multiple
                  pinyin,
+                 content,
                  cszo_regi=None,
+                 cszo_alt=None,
                  index=None
                  ):
         self.cszo = cszo
-        if cszo_regi is not None and cszo_regi == chinese_converter.to_traditional(cszo):
-            self.trad = cszo_regi
-        else:
-            self.trad = chinese_converter.to_traditional(cszo)
+        #if cszo_regi is not None and cszo_regi == chinese_converter.to_traditional(cszo):
+        #    self.trad = cszo_regi
+        #else:
+        #    self.trad = chinese_converter.to_traditional(cszo)
+        self.cszo_alt = cszo_alt or ""
         self.pinyin = pinyin
         self.zhuyin = dragonmapper.transcriptions.pinyin_to_zhuyin(pinyin)
-        self.index = index or None  # corresponds to homo class
+        self.index = index or ""  # corresponds to homo class
+        self.content = content
 
 
 class SzofajSzint:
@@ -38,22 +42,22 @@ class Sense:
     # lönálló jelentésváltozatokat.
     def __init__(self,
                  jel_valt,
-                 peldak,
+                 peldak=None,
                  szam=None):
         self.szam = szam or ""
         self.jel_valt = jel_valt
-        self.peldak = peldak
+        self.peldak = peldak or ""
 
 
 class Pelda:
     def __init__(self,
                  hun_text,
-                 pinyin,
-                 zh_sc):
+                 pinyin=None,
+                 zh_sc=None):
         self.hun_text = hun_text
-        self.pinyin = pinyin
+        self.pinyin = pinyin or ""
         self.zhuyin = dragonmapper.transcriptions.pinyin_to_zhuyin(pinyin)
-        self.zh_sc = zh_sc
+        self.zh_sc = zh_sc or ""
         self.zh_tc = chinese_converter.to_traditional(zh_sc)
 
 
