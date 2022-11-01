@@ -2,10 +2,11 @@ import re
 
 while True:
     roman = input("enter roman num ")
-    if roman == "":
+    if not roman:
         break
-    if re.match(r"^[1-9]+\.\s*$", roman):
+    if re.match(r"^[1-9]+\.*\s*$", roman):
         print("Yay")
+
     else:
         print("Nay")
 

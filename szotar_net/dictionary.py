@@ -1,6 +1,7 @@
 import os.path
 import sys
 
+import dragonmapper.hanzi
 import requests
 from szotar_net import config
 from szotar_net.word import Entry, SzofajSzint, Sense, Pelda
@@ -8,6 +9,8 @@ import chinese_converter
 from dragonmapper import hanzi
 from bs4 import BeautifulSoup
 import re
+
+superscript = ["\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075", "\u2076", "\u2077", "\u2078", "\u2079"]
 
 
 class SzotarNet:
@@ -25,131 +28,81 @@ class SzotarNet:
         # implement importing history later
 
     def get_trad(self, word) -> str:
-        return "[" + chinese_converter.to_traditional(word) + "]"
+        return chinese_converter.to_traditional(word)
 
-    def extract_entry(self, pclass):
-        cszok = pclass.find_all("span", {"class": "cszo"})
+    def render_pclass(self, pclass):
+        # Extract single attributes that are needed for the Entry class
+        cszo_elements = pclass.find_all("span", {"class": "cszo"})
         cszo = ""
         cszo_alt = ""
-        for c in cszok:
-            if hanzi.has_chinese(c.get_text()):
-                if not cszo:
-                    cszo += c.get_text()
-                else:
+        for c in cszo_elements:
+            if c is not None and dragonmapper.hanzi.has_chinese(c.get_text()):
+                if cszo == "":
+                    cszo = c.get_text()
+                elif cszo_alt == "":
                     cszo_alt += c.get_text()
+                else:
+                    cszo_alt += ", " + c.get_text()
+        if cszo_alt != "":
+            cszo_alt = "(" + cszo_alt + ")"
 
-        cszo_regi = pclass.find("span", {"class": "cszo_regi"})
-        index = pclass.find("span", {"class": "homo"})
+        trad = pclass.find("span", {"class": "regicszo"})
+        if trad is not None:
+            trad = trad.get_text()
+        else:
+            trad = self.get_trad(cszo)
+
+        num = pclass.find("span", {"class": "homo"})
+        index = ""
+        if num is not None:
+            num = num.get_text().strip()
+            index = superscript[int(num) - 1]
+
         pinyin = pclass.find("span", {"class": "pinyin_cszo"}).get_text()
 
-        content = None
+        # Innentől nehezebb hahaha
+        # There are seemingly three possibilites:
+        # 1. If the entry is simple, only has one sense, then it is in the same line as the pinyin with example underneath
+        # 2. If the entry has more than one sense, then there are arabic numerals and they start in the next line
+        # 3. If the entry has different meanings that have different part of speech then there are roman numerals
 
-        # If the entry has many SzofajSzint loop through them and add them to list
-        # Find all divs that have a b that contains roman numerals
-        def find_szofaj_szint(tag):
-            if tag.b is None:
-                return False
-            return tag.name == "div" and re.match(r"^(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})\.\s*$", tag.b.string)
+        nl = ""
+        szofaj = ""
+        roman_n = ""
+        arab_n = ""
+        # Case 1
+        if pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling().name == "span":
+            szofaj = pclass.find("span", {"class": "nytan"}).get_text()
+        # Case 2 and 3
+        elif pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling().name == "div":
+            nl = "\n"
+            div_sibling = pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling()
+            num = div_sibling.find("b")
+            if num is not None:
+                if re.match(r"^(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})\.\s*$", num.get_text()):
+                    roman_n = num.get_text().strip() + " "
+                elif re.match(r"^[1-9]+\.\s*$", num.get_text()):
+                    arab_n = "\n" + num.get_text().strip() + " "
+            szofaj = div_sibling.find("span", {"class": "nytan"})
+            if szofaj is not None:
+                szofaj = szofaj.get_text()
+            else: szofaj = ""
 
-        szofaj_szint_divs = pclass.find_all(find_szofaj_szint)
-        # Need to add case for when there is no SzofajSzint
-        for div in szofaj_szint_divs:
-            if content is None:
-                content = []
-            content.append(self.construct_szofaj_szint(self.extract_szofaj_szint_div(div)))
+        content = [SzofajSzint("", szofaj, roman_n)]
+        entry = Entry(cszo, pinyin, content, None, cszo_alt, index)
+        # print(cszo + index + " [" + trad + "] " + cszo_alt + " " + pinyin + nl + " " + roman_n + szofaj + arab_n)
+        print(entry)
 
-        return cszo, pinyin, content, cszo_regi, cszo_alt, index
-
-    def construct_entry(self, cszo, pinyin="", content="", cszo_regi="", cszo_alt="", index=""):
-        return Entry(cszo, pinyin, content, cszo_regi, cszo_alt, index)
-
-    def extract_szofaj_szint_div(self, div):
-        roman_num = div.find("b", string=re.compile(r"^(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})\.\s*$")).get_text()
-        szofaj = div.find("span", {"class": "nytan"})
-
-        senses = []
-
-        def find_sense(tag):
-            if tag.b is None:
-                return False
-            return tag.name == "div" and re.match(r"^[1-9]+\.\s*$", tag.b.string)
-
-        sense_divs = div.find_all(find_sense)
-        for div in sense_divs:
-            senses.append(self.construct_sense(self.extract_sense_div(div)))
-
-        return senses, szofaj, roman_num
-
-    def construct_szofaj_szint(self, senses, szofaj="", roman_num=""):
-        return SzofajSzint(senses, szofaj, roman_num)
-
-    def construct_sense(self, jel_valt, peldak="", szam=""):
-        return Sense(jel_valt, peldak, szam)
-
-    def extract_sense_div(self, div):
-        szam = div.find("b").get_text().strip()
-        # first find szam and peldak then decompose everything else and take the rest
-        peldak = []
-        def find_pelda(tag):
-            if tag.span is None:
-                return False
-            return tag.span["class"] == ["kif"]
-        peldak_div = div.find_all(find_pelda)
-        for pelda_div in peldak_div:
-            peldak.append(self.construct_pelda(self.extract_pelda(pelda_div)))
-
-        div.find("b").decompose()
-        divs = div.find_all("div")
-        for d in divs:
-            d.decompose()
-        jel_valt = div.get_text()
-
-        return jel_valt, peldak, szam
-
-
-        # decompose
-
-    def construct_pelda(self, hun_text, pinyin="", zh_sc=""):
-        return Pelda(hun_text, pinyin, zh_sc)
-
-    def extract_pelda(self, pelda_div):
-        zh_sc = pelda_div.find("span", {"class": "kif"})
-        pinyin = pelda_div.find("span", {"class": "pinyin"})
-        pelda_div.find("span", {"class": "kif"}).decompose()
-        pelda_div.find("span", {"class": "pinyin"}).decompose()
-        hun_text = pelda_div.get_text()
-
-        return hun_text, pinyin, zh_sc
-
-    def print_entries(self, entries):
-        print(entries.__str__)
-
-
-    # Very ugly for now, needs a complete rework using the word classes
     def query(self, chinese_word):
         # Get the page content
         r = self.s.get(self.query_url + chinese_word)
         soup = BeautifulSoup(r.content, "html.parser")
+        word = ""
+        for element in soup.find_all("div", {"class": "pclass"}):
+            self.render_pclass(element)
+        self.render_pclass(soup.find("div", {"class": "pclass_last"}))
 
-        # Extract data and build word
-        # Data we need:
-        # Entry: cszo, pinyin, content, cszo_regi=None, index=None
-        # SzofajSzint: senses, szofaj=None, roman_num=None
-        # Sense: jel_valt, peldak, szam=None
-        # Peldak: hun_text, pinyin, zh_sc
-
-        entries = []
-
-        pclasses = soup.find_all("div", {"class": "pclass"})
-        if pclasses is not None:
-            for pclass in pclasses:
-                entries.append(self.construct_entry(self.extract_entry(pclass)))
-
-        pclass_last = soup.find("div", {"class": "pclass_last"})
-        entries.append(self.construct_entry(self.extract_entry(pclass_last)))
-
-        self.print_entries(entries)
-
+        # Very ugly for now, needs a complete rework using the word classes
         # r = self.s.get(self.query_url + chinese_word)
         # soup = BeautifulSoup(r.content, "html.parser")
         # word = ""

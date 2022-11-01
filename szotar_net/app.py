@@ -8,7 +8,7 @@ class App:
 
     def quicksearch(self, word):
         # Implement quicksearch first since that's easier
-        print(self.dict.query(word))
+        self.dict.query(word)
 
     def end(self):
         self.dict.end()
