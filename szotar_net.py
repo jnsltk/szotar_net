@@ -23,7 +23,7 @@ def main():
     if args.word:
         app.quicksearch(word=args.word)
     else:
-        print("Szótár mód nincs még kész, használd a gyorskeresést (írd be, hogy \"dict -q <szó>\")")
+        print("Szótár mód nincs még kész, használd a gyorskeresést (írd be, hogy \"szotar_net -q <szó>\")")
         sys.exit(0)
 
     app.end()

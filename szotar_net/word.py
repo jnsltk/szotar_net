@@ -2,6 +2,8 @@ import chinese_converter
 import dragonmapper
 from dragonmapper import transcriptions
 
+superscript = ["\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075", "\u2076", "\u2077", "\u2078", "\u2079"]
+
 
 class Entry:
     # Main entry class, corresponds to pclass and pclass_last html classes -- homonyms
@@ -21,7 +23,10 @@ class Entry:
         self.cszo_alt = cszo_alt or ""
         self.pinyin = pinyin
         self.zhuyin = dragonmapper.transcriptions.pinyin_to_zhuyin(pinyin)
-        self.index = index or ""  # corresponds to homo class
+        if index:
+            self.index = index = superscript[int(index) - 1]  # corresponds to homo class
+        else:
+            self.index = ""
         self.content = content
 
     def __str__(self):
@@ -34,7 +39,7 @@ class Entry:
         trad_str = "[" + self.trad + "] "
         cszo_alt_str = ""
         if self.cszo_alt:
-            cszo_alt_str = self.cszo_alt + " "
+            cszo_alt_str = "(" + self.cszo_alt + ") "
         pron = self.pinyin + " "
         content_str = ""
         for c in self.content:
@@ -51,7 +56,7 @@ class SzofajSzint:
                  senses,
                  szofaj=None,
                  roman_num=None):
-        self.szofaj = szofaj or ""
+        self.szofaj = szofaj+"!" or ""
         self.roman_num = roman_num or ""
         self.senses = senses
 

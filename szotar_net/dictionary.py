@@ -7,10 +7,8 @@ from szotar_net import config
 from szotar_net.word import Entry, SzofajSzint, Sense, Pelda
 import chinese_converter
 from dragonmapper import hanzi
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString, Tag
 import re
-
-superscript = ["\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075", "\u2076", "\u2077", "\u2078", "\u2079"]
 
 
 class SzotarNet:
@@ -43,20 +41,14 @@ class SzotarNet:
                     cszo_alt += c.get_text()
                 else:
                     cszo_alt += ", " + c.get_text()
-        if cszo_alt != "":
-            cszo_alt = "(" + cszo_alt + ")"
 
-        trad = pclass.find("span", {"class": "regicszo"})
-        if trad is not None:
-            trad = trad.get_text()
-        else:
-            trad = self.get_trad(cszo)
+        cszo_regi = pclass.find("span", {"class": "regicszo"})
+        if cszo_regi is not None:
+            cszo_regi = cszo_regi.get_text()
 
-        num = pclass.find("span", {"class": "homo"})
-        index = ""
-        if num is not None:
-            num = num.get_text().strip()
-            index = superscript[int(num) - 1]
+        index = pclass.find("span", {"class": "homo"})
+        if index is not None:
+            index = index.get_text().strip()
 
         pinyin = pclass.find("span", {"class": "pinyin_cszo"}).get_text()
 
@@ -66,31 +58,58 @@ class SzotarNet:
         # 2. If the entry has more than one sense, then there are arabic numerals and they start in the next line
         # 3. If the entry has different meanings that have different part of speech then there are roman numerals
 
-        nl = ""
         szofaj = ""
         roman_n = ""
         arab_n = ""
-        # Case 1
-        if pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling().name == "span":
-            szofaj = pclass.find("span", {"class": "nytan"}).get_text()
+        jel_valt = ""
+        # Case 1 --> when there is nytan and a single line definition
+        if pclass.find("span", {"class": "nytan"}):
+            print("1")
+            szofaj = pclass.find("span", {"class": "nytan"}).get_text().strip()
+
+            jel_valt = ""
+            for s in pclass.find("span", {"class": "pinyin_cszo"}).next_siblings:
+                if s.name == "div":
+                    break
+                if s.name == "span" and s["class"] == "nytan":
+                    continue
+                else:
+                    jel_valt += s.get_text()
+            jel_valt = jel_valt.strip()
+        # need another case where there is no nytan, eg 画蛇添足 STILL NEED TO WORK ON THE CONDITION OF THE IF STATEMENT
+        elif isinstance(pclass.find("span", {"class": "pinyin_cszo"}).next_sibling, NavigableString):
+            print("2")
+            jel_valt = ""
+            for s in pclass.find("span", {"class": "pinyin_cszo"}).next_siblings:
+                if s.name == "div":
+                    break
+                else:
+                    jel_valt += s.get_text()
+            jel_valt = jel_valt.strip()
+
         # Case 2 and 3
-        elif pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling().name == "div":
-            nl = "\n"
-            div_sibling = pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling()
+        if pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling("div"):
+            print("3")
+            div_sibling = pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling("div")
             num = div_sibling.find("b")
             if num is not None:
                 if re.match(r"^(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})\.\s*$", num.get_text()):
                     roman_n = num.get_text().strip() + " "
                 elif re.match(r"^[1-9]+\.\s*$", num.get_text()):
-                    arab_n = "\n" + num.get_text().strip() + " "
-            szofaj = div_sibling.find("span", {"class": "nytan"})
-            if szofaj is not None:
-                szofaj = szofaj.get_text()
-            else: szofaj = ""
+                    arab_n = num.get_text().strip() + " "
 
-        content = [SzofajSzint("", szofaj, roman_n)]
-        entry = Entry(cszo, pinyin, content, None, cszo_alt, index)
-        # print(cszo + index + " [" + trad + "] " + cszo_alt + " " + pinyin + nl + " " + roman_n + szofaj + arab_n)
+            if szofaj is None:
+                szofaj = div_sibling.find("span", {"class": "nytan"})
+                if szofaj is not None:
+                    szofaj = szofaj.get_text().strip()
+                else:
+                    szofaj = ""
+
+        # Only for testing, will need for loops, perhaps every class created in separate method
+
+        senses = [Sense("#"+jel_valt)]
+        content = [SzofajSzint(senses, szofaj, roman_n)]
+        entry = Entry(cszo, pinyin, content, cszo_regi, cszo_alt, index)
         print(entry)
 
     def query(self, chinese_word):
