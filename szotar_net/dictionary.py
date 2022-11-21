@@ -64,21 +64,19 @@ class SzotarNet:
         jel_valt = ""
         # Case 1 --> when there is nytan and a single line definition
         if pclass.find("span", {"class": "nytan"}):
-            print("1")
             szofaj = pclass.find("span", {"class": "nytan"}).get_text().strip()
 
             jel_valt = ""
             for s in pclass.find("span", {"class": "pinyin_cszo"}).next_siblings:
                 if s.name == "div":
                     break
-                if s.name == "span" and s["class"] == "nytan":
-                    continue
-                else:
-                    jel_valt += s.get_text()
+                if szofaj is not None:
+                    if s.get_text().strip() == szofaj:
+                        continue
+                jel_valt += s.get_text()
             jel_valt = jel_valt.strip()
         # need another case where there is no nytan, eg 画蛇添足 STILL NEED TO WORK ON THE CONDITION OF THE IF STATEMENT
         elif isinstance(pclass.find("span", {"class": "pinyin_cszo"}).next_sibling, NavigableString):
-            print("2")
             jel_valt = ""
             for s in pclass.find("span", {"class": "pinyin_cszo"}).next_siblings:
                 if s.name == "div":
@@ -89,7 +87,6 @@ class SzotarNet:
 
         # Case 2 and 3
         if pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling("div"):
-            print("3")
             div_sibling = pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling("div")
             num = div_sibling.find("b")
             if num is not None:
