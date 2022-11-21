@@ -76,6 +76,7 @@ class SzotarNet:
                 jel_valt += s.get_text()
             jel_valt = jel_valt.strip()
         # need another case where there is no nytan, eg 画蛇添足 STILL NEED TO WORK ON THE CONDITION OF THE IF STATEMENT
+        # THis is a new comment
         elif isinstance(pclass.find("span", {"class": "pinyin_cszo"}).next_sibling, NavigableString):
             jel_valt = ""
             for s in pclass.find("span", {"class": "pinyin_cszo"}).next_siblings:
