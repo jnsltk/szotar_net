@@ -31,5 +31,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# https://fanyi.youdao.com/openapi.do?keyfrom=blog125&key=21376174&type=data&doctype=json&version=1.1&q=%E6%9C%89%E9%81%93

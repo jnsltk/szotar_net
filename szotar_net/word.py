@@ -56,7 +56,7 @@ class SzofajSzint:
                  senses,
                  szofaj=None,
                  roman_num=None):
-        self.szofaj = szofaj+"!" or ""
+        self.szofaj = szofaj or ""
         self.roman_num = roman_num or ""
         self.senses = senses
 

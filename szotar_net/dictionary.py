@@ -28,7 +28,7 @@ class SzotarNet:
     def get_trad(self, word) -> str:
         return chinese_converter.to_traditional(word)
 
-    def render_pclass(self, pclass):
+    def render_entry(self, pclass):
         # Extract single attributes that are needed for the Entry class
         cszo_elements = pclass.find_all("span", {"class": "cszo"})
         cszo = ""
@@ -62,7 +62,7 @@ class SzotarNet:
         roman_n = ""
         arab_n = ""
         jel_valt = ""
-        # Case 1 --> when there is nytan and a single line definition
+        # Case 1.1 --> when there is nytan and a single line definition -- WORKS
         if pclass.find("span", {"class": "nytan"}):
             szofaj = pclass.find("span", {"class": "nytan"}).get_text().strip()
 
@@ -75,8 +75,7 @@ class SzotarNet:
                         continue
                 jel_valt += s.get_text()
             jel_valt = jel_valt.strip()
-        # need another case where there is no nytan, eg 画蛇添足 STILL NEED TO WORK ON THE CONDITION OF THE IF STATEMENT
-        # THis is a new comment
+        # Case 1.2 --> no nytan, single line definition -- WORKS
         elif isinstance(pclass.find("span", {"class": "pinyin_cszo"}).next_sibling, NavigableString):
             jel_valt = ""
             for s in pclass.find("span", {"class": "pinyin_cszo"}).next_siblings:
@@ -91,6 +90,7 @@ class SzotarNet:
             div_sibling = pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling("div")
             num = div_sibling.find("b")
             if num is not None:
+                # this is where we should have a for loop to go through all numerals to extract senses
                 if re.match(r"^(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})\.\s*$", num.get_text()):
                     roman_n = num.get_text().strip() + " "
                 elif re.match(r"^[1-9]+\.\s*$", num.get_text()):
@@ -104,11 +104,19 @@ class SzotarNet:
                     szofaj = ""
 
         # Only for testing, will need for loops, perhaps every class created in separate method
-
-        senses = [Sense("#"+jel_valt)]
+        senses = [Sense(jel_valt)]
         content = [SzofajSzint(senses, szofaj, roman_n)]
         entry = Entry(cszo, pinyin, content, cszo_regi, cszo_alt, index)
         print(entry)
+
+    def extract_szofaj_szint(self):
+        pass
+
+    def extract_sense(self):
+        pass
+
+    def extract_pelda(self):
+        pass
 
     def query(self, chinese_word):
         # Get the page content
@@ -116,8 +124,8 @@ class SzotarNet:
         soup = BeautifulSoup(r.content, "html.parser")
         word = ""
         for element in soup.find_all("div", {"class": "pclass"}):
-            self.render_pclass(element)
-        self.render_pclass(soup.find("div", {"class": "pclass_last"}))
+            self.render_entry(element)
+        self.render_entry(soup.find("div", {"class": "pclass_last"}))
 
         # Very ugly for now, needs a complete rework using the word classes
         # r = self.s.get(self.query_url + chinese_word)
