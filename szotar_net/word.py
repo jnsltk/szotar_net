@@ -24,7 +24,7 @@ class Entry:
         self.pinyin = pinyin
         self.zhuyin = dragonmapper.transcriptions.pinyin_to_zhuyin(pinyin)
         if index:
-            self.index = index = superscript[int(index) - 1]  # corresponds to homo class
+            self.index = superscript[int(index) - 1]  # corresponds to homo class
         else:
             self.index = ""
         self.content = content

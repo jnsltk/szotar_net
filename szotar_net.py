@@ -7,13 +7,13 @@ from szotar_net.app import App
 def main():
     # Create the parser
     parser = argparse.ArgumentParser(prog="szotar_net",
-                                     description="Termninál szotar.net kínai-magyar szótár kliens")
+                                     description="Szotar.net Chinese-Hungarian dictionary client in the terminal")
 
     # Add the arguments
     parser.add_argument("-q",
                         dest="word",
                         metavar="<word>",
-                        help="Gyors keresés")
+                        help="Quick search")
 
     # Execute the parse_args() method
     args = parser.parse_args()
@@ -23,7 +23,7 @@ def main():
     if args.word:
         app.quicksearch(word=args.word)
     else:
-        print("Szótár mód nincs még kész, használd a gyorskeresést (írd be, hogy \"szotar_net -q <szó>\")")
+        print("Query mode not ready yet, use quick search (type \"szotar_net -q <word>\")")
         sys.exit(0)
 
     app.end()

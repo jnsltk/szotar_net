@@ -30,9 +30,10 @@ class SzotarNet:
 
     def render_entry(self, pclass):
         # Extract single attributes that are needed for the Entry class
-        cszo_elements = pclass.find_all("span", {"class": "cszo"})
         cszo = ""
         cszo_alt = ""
+
+        cszo_elements = pclass.find_all("span", {"class": "cszo"})
         for c in cszo_elements:
             if c is not None and dragonmapper.hanzi.has_chinese(c.get_text()):
                 if cszo == "":
@@ -52,21 +53,35 @@ class SzotarNet:
 
         pinyin = pclass.find("span", {"class": "pinyin_cszo"}).get_text()
 
-        # Innentől nehezebb hahaha
-        # There are seemingly three possibilites:
+        # get content
+        content = self.extract_szofaj_szint(pclass)
+
+        entry = Entry(cszo, pinyin, content, cszo_regi, cszo_alt, index)
+        print(entry)  # Will replace with colorful print function or something
+
+    def extract_szofaj_szint(self, pclass):
+        senses = []
+        szofaj = ""
+        roman_num = ""
+
+        # There are seemingly three possibilities:
         # 1. If the entry is simple, only has one sense, then it is in the same line as the pinyin with example underneath
         # 2. If the entry has more than one sense, then there are arabic numerals and they start in the next line
         # 3. If the entry has different meanings that have different part of speech then there are roman numerals
+        # somehow also need to account for the case where there's a one-line definition
 
         szofaj = ""
         roman_n = ""
-        arab_n = ""
         jel_valt = ""
         # Case 1.1 --> when there is nytan and a single line definition -- WORKS
-        if pclass.find("span", {"class": "nytan"}):
+        num = None;
+        if pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling("div"):
+            div_sibling = pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling("div")
+            num = div_sibling.find("b")
+
+        if pclass.find("span", {"class": "nytan"}) and num is None:
             szofaj = pclass.find("span", {"class": "nytan"}).get_text().strip()
 
-            jel_valt = ""
             for s in pclass.find("span", {"class": "pinyin_cszo"}).next_siblings:
                 if s.name == "div":
                     break
@@ -75,51 +90,85 @@ class SzotarNet:
                         continue
                 jel_valt += s.get_text()
             jel_valt = jel_valt.strip()
+            senses = [jel_valt]
+            return [SzofajSzint(senses, szofaj, roman_num)]
         # Case 1.2 --> no nytan, single line definition -- WORKS
-        elif isinstance(pclass.find("span", {"class": "pinyin_cszo"}).next_sibling, NavigableString):
-            jel_valt = ""
+        elif isinstance(pclass.find("span", {"class": "pinyin_cszo"}).next_sibling, NavigableString) and num is None:
             for s in pclass.find("span", {"class": "pinyin_cszo"}).next_siblings:
                 if s.name == "div":
                     break
                 else:
                     jel_valt += s.get_text()
             jel_valt = jel_valt.strip()
+            senses = [jel_valt]
+            return [SzofajSzint(senses, szofaj, roman_num)]
 
-        # Case 2 and 3
+        # Case 2 and 3, needs a loop, function
+        # extract szofaj and roman_num
+        szofajszint_list = []
+
         if pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling("div"):
-            div_sibling = pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling("div")
-            num = div_sibling.find("b")
-            if num is not None:
-                # this is where we should have a for loop to go through all numerals to extract senses
-                if re.match(r"^(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})\.\s*$", num.get_text()):
-                    roman_n = num.get_text().strip() + " "
-                elif re.match(r"^[1-9]+\.\s*$", num.get_text()):
-                    arab_n = num.get_text().strip() + " "
+            div_siblings = pclass.find("span", {"class": "pinyin_cszo"}).find_next_siblings("div")
+            for div_sibling in div_siblings:
+                num = div_sibling.find("b")
+                if div_sibling == pclass.find("div", {"class": "frazeo"}):
+                    continue
+                if num is not None:
+                    if re.match(r"^(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})\.\s*$", num.get_text()):
+                        roman_num = num.get_text().strip()
+                        szofaj = num.find_next_sibling("span").get_text().strip()
+                        if div_sibling.find("span", {"class": "nytan"}).find_next_sibling("div"):
+                            div_sub_siblings = div_sibling.find("span", {"class": "nytan"}).find_next_siblings("div")
+                            sense_list = []
+                            for div_sub_sibling in div_sub_siblings:
+                                sub_num = div_sub_sibling.find("b")
+                                if sub_num is not None:
+                                    if re.match(r"^[1-9]+\.\s*$", sub_num.get_text()):
+                                        arab_num = sub_num.get_text().strip()
+                                        jel_valt = ""
+                                        for s in div_sub_sibling.find("b").next_siblings:
+                                            if s.name == "div":
+                                                break
+                                            if szofaj is not None:
+                                                if s.get_text().strip() == szofaj:
+                                                    continue
+                                            jel_valt += s.get_text().strip()
+                                sense_list.append(Sense(jel_valt, None, arab_num))
+                            senses = sense_list
+                if szofaj is None:
+                    szofaj = div_sibling.find("span", {"class": "nytan"})
+                    if szofaj is not None:
+                        szofaj = szofaj.get_text().strip()
+                    else:
+                        szofaj = ""
 
-            if szofaj is None:
-                szofaj = div_sibling.find("span", {"class": "nytan"})
-                if szofaj is not None:
-                    szofaj = szofaj.get_text().strip()
-                else:
-                    szofaj = ""
+                szofajszint_list.append(SzofajSzint(senses, szofaj, roman_num))
 
-        # Only for testing, will need for loops, perhaps every class created in separate method
-        senses = [Sense(jel_valt)]
-        content = [SzofajSzint(senses, szofaj, roman_n)]
-        entry = Entry(cszo, pinyin, content, cszo_regi, cszo_alt, index)
-        print(entry)
+        # senses.append(self.extract_sense())
 
-    def extract_szofaj_szint(self):
-        pass
+        return szofajszint_list
 
     def extract_sense(self):
-        pass
+        jel_valt = ""
+        peldak = []
+        szam = ""
+
+        # extract jel_valt and szam
+
+        # for loop for extracting all examples (peldak):
+        peldak.append(self.extract_pelda())
+
+        return Sense(jel_valt, peldak, szam)
 
     def extract_pelda(self):
-        pass
+        hun_text = ""
+        pinyin = ""
+        zh_sc = ""
+        return Pelda(hun_text, pinyin, zh_sc)
 
     def query(self, chinese_word):
         # Get the page content
+        chinese_word = chinese_converter.to_simplified(chinese_word)
         r = self.s.get(self.query_url + chinese_word)
         soup = BeautifulSoup(r.content, "html.parser")
         word = ""
