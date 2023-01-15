@@ -1,6 +1,7 @@
 import chinese_converter
 import dragonmapper
 from dragonmapper import transcriptions
+import re
 
 superscript = ["\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075", "\u2076", "\u2077", "\u2078", "\u2079"]
 
@@ -73,8 +74,13 @@ class SzofajSzint:
         if self.szofaj:
             szofaj_str = self.szofaj + " "
         nl = ""
-        if rom_str and szofaj_str:
+        if rom_str and szofaj_str and len(self.senses) > 1:
             nl = "\n"
+            if not re.match(r"^[1-9]+\.\s*$", sense_str[:2]):
+                return nl + rom_str + szofaj_str + sense_str
+            return nl + rom_str + szofaj_str + nl + sense_str
+        elif rom_str and szofaj_str and len(self.senses) == 1:
+            return "\n" + rom_str + szofaj_str + sense_str
         return nl + rom_str + szofaj_str + nl + sense_str
 
 
