@@ -81,6 +81,9 @@ class SzofajSzint:
             return nl + rom_str + szofaj_str + nl + sense_str
         elif rom_str and szofaj_str and len(self.senses) == 1:
             return "\n" + rom_str + szofaj_str + sense_str
+        elif not rom_str and re.match(r"^[1-9]+\.\s*$", sense_str[:2]):
+            nl = "\n"
+            return szofaj_str + nl + sense_str
         return nl + rom_str + szofaj_str + nl + sense_str
 
 

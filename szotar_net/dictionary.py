@@ -60,8 +60,6 @@ class SzotarNet:
         print(entry)  # Will replace with colorful print function or something
 
     def extract_szofaj_szint(self, pclass):
-        senses = []
-        szofaj = ""
         roman_num = ""
 
         # There are seemingly three possibilities:
@@ -70,11 +68,10 @@ class SzotarNet:
         # 3. If the entry has different meanings that have different part of speech then there are roman numerals
         # somehow also need to account for the case where there's a one-line definition
 
-        szofaj = ""
-        roman_n = ""
+        szofaj = None
         jel_valt = ""
         # Case 1.1 --> when there is nytan and a single line definition -- WORKS
-        num = ""
+        num = None
         if pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling("div"):
             div_sibling = pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling("div")
             num = div_sibling.find("b")
@@ -106,11 +103,23 @@ class SzotarNet:
         # In case there are either roman numerals or arabic numerals:
 
         szofajszint_list = []
+        sense_list = []
 
         if pclass.find("span", {"class": "pinyin_cszo"}).find_next_sibling("div"):
             div_siblings = pclass.find("span", {"class": "pinyin_cszo"}).find_next_siblings("div")
             for div_sibling in div_siblings:
-                szofajszint_list.append(self.extract_nums(pclass, div_sibling))
+                either_num = self.extract_nums(pclass, div_sibling)
+                if isinstance(either_num, Sense):
+                    sense_list.append(either_num)
+                    szofaj = pclass.find("span", {"class": "nytan"})
+                    if szofaj:
+                        szofaj = szofaj.get_text().strip()
+                    else:
+                        szofaj = ""
+                else:
+                    szofajszint_list.append(either_num)
+        if sense_list:
+            return [SzofajSzint(sense_list, szofaj)]
 
         return szofajszint_list
 
@@ -119,7 +128,7 @@ class SzotarNet:
         # if roman, extracts szofaj, then calls itself again
         # if arabic, extracts senses (by calling extract_sense() )
         # in the end creates senses, puts them in a list, creates szofajszint and returns it
-        szofaj = ""
+        szofaj = None
         roman_num = ""
         senses = []
         num = div_sibling.find("b")
@@ -147,10 +156,9 @@ class SzotarNet:
                     senses.append(self.extract_nums(pclass, div_ar_sibling))
 
             elif re.match(r"^[1-9]+\.\s*$", num.get_text()):
+                return self.extract_sense(div_sibling, szofaj)
 
-                senses.append(self.extract_sense(div_sibling, szofaj))
-
-        if szofaj == "":
+        if szofaj is None:
             szofaj = div_sibling.find("span", {"class": "nytan"})
             if szofaj is not None:
                 szofaj = szofaj.get_text().strip()
@@ -159,7 +167,6 @@ class SzotarNet:
         return SzofajSzint(senses, szofaj, roman_num)
     def extract_sense(self, div_sibling, szofaj):
         jel_valt = ""
-        peldak = []
         szam = div_sibling.find("b").get_text().strip()
 
         for s in div_sibling.find("b").next_siblings:
@@ -168,19 +175,32 @@ class SzotarNet:
             if szofaj is not None:
                 if s.get_text().strip() == szofaj:
                     continue
-            jel_valt += s.get_text().strip()
+            jel_valt += s.get_text()
+        jel_valt = jel_valt.strip()
         # extract jel_valt and szam
 
         # for loop for extracting all examples (peldak):
-        peldak.append(self.extract_pelda())
+        peldak = self.extract_pelda(div_sibling) or ""
 
         return Sense(jel_valt, "", szam)
 
-    def extract_pelda(self):
+    def extract_pelda(self, div_sibling):
+        peldak = []
         hun_text = ""
         pinyin = ""
         zh_sc = ""
-        return Pelda(hun_text, pinyin, zh_sc)
+        for pelda in div_sibling.find_next_siblings("div"):
+            zh_sc = pelda.find("span", {"class": "kif"})
+            pinyin = pelda.find("span", {"class": "pinyin"})
+            hun_text = "hello"
+
+            if zh_sc and pinyin and hun_text:
+                zh_sc = zh_sc.get_text().strip()
+                pinyin = pinyin.get_text().strip()
+                # hun_text = hun_text.get_text().strip()
+                peldak.append(Pelda(hun_text, pinyin, zh_sc))
+
+        return peldak
 
     def query(self, chinese_word):
         # Get the page content
