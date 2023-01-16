@@ -127,7 +127,7 @@ class Pelda:
         zh_text = self.zh_sc
         pron = self.pinyin
         line = " | "
-        return line + zh_text + "\n" + line + pron + "\n" + line + self.hun_text
+        return line + zh_text + line + pron + line + self.hun_text
 
 
 

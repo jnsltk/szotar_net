@@ -1,4 +1,3 @@
-from szotar_net import config
 from szotar_net.dictionary import SzotarNet
 
 
