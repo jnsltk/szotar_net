@@ -1,14 +1,17 @@
 import re
+from termcolor import colored, cprint
+from szotar_net.colours import COLOURS
 
 while True:
     roman = input("enter roman num ")
     if not roman:
         break
     if re.match(r"^[1-9]+\.*\s*$", roman):
-        print("Yay")
+        cprint("Yay", attrs=["bold"])
 
     else:
-        print("Nay")
+        print(type(colored("Nay", *COLOURS["pelda_zh"])))
+        print(colored("Nay", *COLOURS["pelda_zh"]))
 
 
 # r"^[1-9]+\.\s*$"

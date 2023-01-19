@@ -1,15 +1,16 @@
+import re
+
+import chinese_converter
 import dragonmapper.hanzi
 import requests
+from bs4 import BeautifulSoup, NavigableString
+
 from szotar_net import config
 from szotar_net.word import Entry, SzofajSzint, Sense, Pelda
-import chinese_converter
-from bs4 import BeautifulSoup, NavigableString
-import re
 
 
 def get_trad(word) -> str:
     return chinese_converter.to_traditional(word)
-
 
 class SzotarNet:
     def __init__(self):
@@ -145,7 +146,7 @@ class SzotarNet:
                     jel += s.get_text()
                 jel = jel.strip()
                 if jel != "":
-                    senses = [jel]
+                    senses = [self.create_sense(jel, div_sibling)]
 
                 div_ar_siblings = num.find_next_siblings("div")
                 for div_ar_sibling in div_ar_siblings:
@@ -183,9 +184,6 @@ class SzotarNet:
 
     def extract_pelda(self, div_sibling) -> list[Pelda]:
         peldak = []
-        hun_text = ""
-        pinyin = ""
-        zh_sc = ""
         for pelda in div_sibling.find_all("div"):
             zh_sc = pelda.find("span", {"class": "kif"})
             pinyin = pelda.find("span", {"class": "pinyin"})
@@ -207,8 +205,8 @@ class SzotarNet:
 
     def render_entries(self, entries:list[Entry]):
         for entry in entries:
-            print(entry)
-            print("\n")
+            if entry:
+                print(entry)
 
     def query(self, chinese_word:str):
         # Get the page content
