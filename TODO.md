@@ -31,16 +31,17 @@ szotar_net is a command line based client for the Chinese-Hungarian dictionary p
 - [ ] Add loading animation (| / 一 \ |) ...
 - [ ] Reduce the amount of Chinese language related packages, there's a lot of overlap in functionality
 - [ ] Use exceptions
+- [ ] Option to regenerate/reset config
+- [ ] Ask for Szotar.net credentials on first run
 
 ### In progress
 
-- [ ] Interactive shell mode
+- [x] Interactive shell mode
 - [ ] Add settings menu
   - [ ] Option for Trad/Simp
   - [ ] Option for zhuyin/pinyin
   - [ ] Option to set custom colours
   - [ ] Toggle for the Taiwanese word feature
-- [ ] Save/serialize session object
 - [ ] Build a package, make it installable via pip or something
 
 ### Done
@@ -50,3 +51,4 @@ szotar_net is a command line based client for the Chinese-Hungarian dictionary p
 - [x] Add colours, refactor printing
   - [x] Pinyin colours
   - [x] Colours for different types of texts (increase readability)
+- [x] Save/serialize session object

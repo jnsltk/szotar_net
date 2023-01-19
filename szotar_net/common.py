@@ -57,3 +57,29 @@ def pron_tone_colour(pron_text:str, zh_text:str) -> str:
 
     return col_str
 
+def get_logo() -> str:
+     # Prints this logo with original szotar.net colors:
+     #               _                        _
+     #              | |                      | |
+     #  ___ _______ | |_ __ _ _ __ _ __   ___| |_
+     # / __|_  / _ \| __/ _` | '__| '_ \ / _ \ __|
+     # \__ \/ / (_) | || (_| | |_ | | | |  __/ |_
+     # |___/___\___/ \__\__,_|_(_)|_| |_|\___|\__|
+     # -=== Kínai-magyar szótár === 漢 匈 辭 典 ===-
+
+    logo = colours.get_colour_string("""               _             """, "logo_green")\
+         + colours.get_colour_string("""           _   \n""", "logo_yellow")\
+         + colours.get_colour_string("""              | |            """, "logo_green")\
+         + colours.get_colour_string("""          | |  \n""", "logo_yellow")\
+         + colours.get_colour_string("""  ___ _______ | |_ __ _ _ __ """, "logo_green")\
+         + colours.get_colour_string("""_ __   ___| |_ \n""", "logo_yellow")\
+         + colours.get_colour_string(""" / __|_  / _ \| __/ _` | '__""", "logo_green")\
+         + colours.get_colour_string("""| '_ \ / _ \ __|\n""", "logo_yellow")\
+         + colours.get_colour_string(""" \__ \/ / (_) | || (_| | |_ """, "logo_green")\
+         + colours.get_colour_string("""| | | |  __/ |_ \n""", "logo_yellow")\
+         + colours.get_colour_string(""" |___/___\___/ \__\__,_|_""", "logo_green")\
+         + colours.get_colour_string("""(_)|_| |_|\___|\__|\n""", "logo_yellow")\
+         + "-=== Kínai-magyar szótár === 漢 匈 辭 典 ===-\n"
+    return logo
+
+

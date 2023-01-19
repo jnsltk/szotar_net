@@ -1,3 +1,5 @@
+import os.path
+import pickle
 import re
 
 import chinese_converter
@@ -16,15 +18,31 @@ class SzotarNet:
     def __init__(self):
         self.login_url = config.get("SzotarNet", "login_url")
         self.query_url = config.get("SzotarNet", "query_url")
+        self.session_file = config.get("SzotarNet", "session_path")
         self.payload = {
             "email": config.get("SzotarNet", "email"),
             "password": config.get("SzotarNet", "password"),
             "belepvemarad": "on"
         }
-        self.s = requests.Session()
-        self.s.post(self.login_url, data=self.payload)
+        self.s = self.load_session()
         self.history = {}
         # implement importing history later
+
+    def save_session(self):
+        with open(self.session_file, "wb") as f:
+            pickle.dump(self.s, f)
+
+    def load_session(self) -> requests.Session:
+        if os.path.isfile(self.session_file):
+            with open(self.session_file, "rb") as f:
+                return pickle.load(f)
+        else:
+            return self.new_session()
+
+    def new_session(self) -> requests.Session:
+        s = requests.Session()
+        s.post(self.login_url, data=self.payload)
+        return s
 
     def extract_entry(self, pclass) -> Entry:
         # Extract single attributes that are needed for the Entry class
@@ -203,12 +221,15 @@ class SzotarNet:
 
         return peldak
 
-    def render_entries(self, entries:list[Entry]):
+    def return_entries(self, entries:list[Entry]) ->str:
+        entry_str = ""
         for entry in entries:
             if entry:
-                print(entry)
+                entry_str += entry.__str__()
+                entry_str = entry_str[:-1]
+        return entry_str
 
-    def query(self, chinese_word:str):
+    def query(self, chinese_word:str) -> str:
         # Get the page content
         chinese_word = chinese_converter.to_simplified(chinese_word)
         r = self.s.get(self.query_url + chinese_word)
@@ -216,13 +237,13 @@ class SzotarNet:
         pclass_last = soup.find("div", {"class": "pclass_last"})
         entries = []
         if not pclass_last:
-            print("Nincs találat!")
-            return
+            return "Nincs találat!"
         for element in soup.find_all("div", {"class": "pclass"}):
             entries.append(self.extract_entry(element))
         entries.append(self.extract_entry(pclass_last))
 
-        self.render_entries(entries)
+        return self.return_entries(entries)
 
     def end(self):
+        self.save_session()
         self.s.close()

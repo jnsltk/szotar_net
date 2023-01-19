@@ -48,6 +48,9 @@ class Entry:
         else:
             common.config_error()
 
+        zhuyin_col = common.pron_tone_colour(self.zhuyin, cszo_str)
+        pinyin_col = common.pron_tone_colour(dragonmapper.transcriptions.zhuyin_to_pinyin(self.zhuyin), cszo_str)
+
         cszo_str = common.zh_text_colour(cszo_str)
         alt_hanzi = "〔" + common.zh_text_colour(alt_hanzi) + "〕"
 
@@ -63,8 +66,7 @@ class Entry:
             cszo_variant_str = "(" + self.cszo_variant + ") "
 
         pron = ""
-        zhuyin_col = common.pron_tone_colour(self.zhuyin, self.cszo)
-        pinyin_col = common.pron_tone_colour(dragonmapper.transcriptions.zhuyin_to_pinyin(self.zhuyin), self.cszo)
+
         if config.get("Settings", "pron") == "both_zhuyin_first":
             pron = zhuyin_col + " " + pinyin_col
         elif config.get("Settings", "pron") == "both_pinyin_first":
@@ -81,7 +83,7 @@ class Entry:
         for c in self.content:
             content_str += c.__str__()
 
-        return cszo_str + alt_hanzi + cszo_variant_str + pron + content_str + "\n"
+        return cszo_str + alt_hanzi + cszo_variant_str + pron + content_str  + "\n"  + "\n"
 
 
 
@@ -195,7 +197,9 @@ class Pelda:
             else:
                 common.config_error()
             line = colours.get_colour_string(" | ", "misc")
-            return "   " + line + zh_text + line + pron + line + self.hun_text
+            if config.getboolean("Settings", "show_example_pron"):
+                return "   " + line + zh_text + line + pron + line + self.hun_text
+            return "   " + line + zh_text + line + self.hun_text
         return
 
 

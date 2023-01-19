@@ -23,8 +23,7 @@ def main():
     if args.word:
         app.quicksearch(word=args.word)
     else:
-        print("Query mode not ready yet, use quick search (type \"szotar_net -q <word>\")")
-        sys.exit(0)
+        app.interactive_mode()
 
     app.end()
 

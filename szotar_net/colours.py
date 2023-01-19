@@ -8,6 +8,8 @@ COLOURS = {
     "misc": ("yellow", None, None),
     "pelda_zh": ("light_blue", None, None),
     "pelda_pinyin": (None , None, ["bold"]),
+    "logo_green": ("green", None, None),
+    "logo_yellow": ("yellow", None, None),
 }
 
 TONES = [
