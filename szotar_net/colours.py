@@ -1,6 +1,6 @@
 from termcolor import colored
-from szotar_net import config
 
+from szotar_net import config
 
 COLOURS = {
     "roman_num": ("magenta", None, ["bold"]),

@@ -1,6 +1,7 @@
 import chinese_converter
 import dragonmapper
 from dragonmapper import transcriptions
+
 from szotar_net import colours, config, common
 
 
@@ -83,7 +84,7 @@ class Entry:
         for c in self.content:
             content_str += c.__str__()
 
-        return cszo_str + alt_hanzi + cszo_variant_str + pron + content_str  + "\n"  + "\n"
+        return cszo_str + alt_hanzi + cszo_variant_str + pron + content_str  + "\n\n"
 
 
 

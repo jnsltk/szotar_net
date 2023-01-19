@@ -1,7 +1,9 @@
-import sys
-from termcolor import cprint
-from pypinyin import pinyin, lazy_pinyin, Style
 import re
+import sys
+
+from pypinyin import lazy_pinyin, Style
+from termcolor import cprint
+
 from szotar_net import colours
 
 

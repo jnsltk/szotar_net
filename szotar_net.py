@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-import sys
+
 from szotar_net.app import App
 
 

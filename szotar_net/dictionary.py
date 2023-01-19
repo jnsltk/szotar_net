@@ -226,13 +226,15 @@ class SzotarNet:
         for entry in entries:
             if entry:
                 entry_str += entry.__str__()
-                entry_str = entry_str[:-1]
+        entry_str = entry_str[:-1]
         return entry_str
 
     def query(self, chinese_word:str) -> str:
         # Get the page content
         chinese_word = chinese_converter.to_simplified(chinese_word)
+        print("Connecting to szotar.net...")
         r = self.s.get(self.query_url + chinese_word)
+        print("Downloaded!")
         soup = BeautifulSoup(r.content, "html.parser")
         pclass_last = soup.find("div", {"class": "pclass_last"})
         entries = []
