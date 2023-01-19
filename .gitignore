@@ -1,9 +1,5 @@
 etc/szotar_net/session.pkl
 
-# PyCharm #
-###########
-.idea
-
 # OS generated files #
 ######################
 .DS_Store
