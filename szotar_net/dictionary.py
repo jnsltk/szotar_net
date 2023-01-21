@@ -14,6 +14,7 @@ from szotar_net.word import Entry, SzofajSzint, Sense, Pelda
 def get_trad(word) -> str:
     return chinese_converter.to_traditional(word)
 
+
 class SzotarNet:
     def __init__(self):
         self.login_url = config.get("SzotarNet", "login_url")
@@ -180,6 +181,7 @@ class SzotarNet:
             else:
                 szofaj = ""
         return SzofajSzint(senses, szofaj, roman_num)
+
     def extract_sense(self, div_sibling, szofaj) -> Sense:
         jel_valt = ""
         szam = div_sibling.find("b").get_text().strip()
@@ -212,7 +214,6 @@ class SzotarNet:
                         break
                     hun_text += s.get_text()
 
-
             if zh_sc and pinyin and hun_text:
                 zh_sc = zh_sc.get_text().strip()
                 pinyin = pinyin.get_text().strip()
@@ -221,7 +222,7 @@ class SzotarNet:
 
         return peldak
 
-    def return_entries(self, entries:list[Entry]) ->str:
+    def return_entries(self, entries: list[Entry]) -> str:
         entry_str = ""
         for entry in entries:
             if entry:
@@ -229,7 +230,7 @@ class SzotarNet:
         entry_str = entry_str[:-1]
         return entry_str
 
-    def query(self, chinese_word:str) -> str:
+    def query(self, chinese_word: str) -> str:
         # Get the page content
         chinese_word = chinese_converter.to_simplified(chinese_word)
         print("Connecting to szotar.net...")
