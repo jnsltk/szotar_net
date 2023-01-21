@@ -8,7 +8,6 @@ szotar_net is a command line based client for the Chinese-Hungarian dictionary p
   - [ ] Option for zhuyin/pinyin
   - [ ] Option to set custom colours
   - [ ] Toggle for the Taiwanese word feature
-- [ ] Show option for alternative pronunciations (eg. 為)
 - [ ] Feature to say if a word is Mainland only, gives Taiwanese alternative
 - [ ] Interactive shell mode
 - [ ] Save/serialize session object
@@ -36,14 +35,12 @@ szotar_net is a command line based client for the Chinese-Hungarian dictionary p
 
 ### In progress
 
-- [x] Interactive shell mode
 - [ ] Add settings menu
   - [ ] Option for Trad/Simp
   - [ ] Option for zhuyin/pinyin
   - [ ] Option to set custom colours
   - [ ] Toggle for the Taiwanese word feature
-- [ ] Build a package, make it installable via pip or something
-  - [ ] Fix paths (IMPORTANT!!)
+- [ ] Show option for alternative pronunciations (eg. 為)
 
 ### Done
 - [x] Properly scraping all data from a szotar.net entry
@@ -53,3 +50,6 @@ szotar_net is a command line based client for the Chinese-Hungarian dictionary p
   - [x] Pinyin colours
   - [x] Colours for different types of texts (increase readability)
 - [x] Save/serialize session object
+- [x] Interactive shell mode
+- [x] Build a package, make it installable via pip or something
+  - [x] Fix paths (IMPORTANT!!)
