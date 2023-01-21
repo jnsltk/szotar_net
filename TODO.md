@@ -43,6 +43,7 @@ szotar_net is a command line based client for the Chinese-Hungarian dictionary p
   - [ ] Option to set custom colours
   - [ ] Toggle for the Taiwanese word feature
 - [ ] Build a package, make it installable via pip or something
+  - [ ] Fix paths (IMPORTANT!!)
 
 ### Done
 - [x] Properly scraping all data from a szotar.net entry
