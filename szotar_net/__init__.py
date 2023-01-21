@@ -10,6 +10,7 @@ def read_config(prefix, rel='etc/szotar_net/config.ini'):
         cp = configparser.ConfigParser()
         cp.read(path)
         cp.set('paths', 'prefix', prefix)
+        cp.set("paths", "config", path)
         return cp
     else:
         return None
@@ -20,15 +21,15 @@ def find_config():
 
     dirname = os.path.dirname(__file__)
 
-    prefixes = []
-    prefixes.append(os.path.realpath(os.path.join(dirname, '..')))
+    prefixes = [os.path.realpath(os.path.join(dirname, '..'))]
     if re.search('/lib/', dirname):
         prefixes.append(re.sub('/lib/.*', '', dirname))
     prefixes.append(sys.prefix)
 
     for prefix in prefixes:
         cp = read_config(prefix)
-        if cp: return cp
+        if cp:
+            return cp
 
     return None
 

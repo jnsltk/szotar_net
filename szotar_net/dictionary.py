@@ -19,7 +19,7 @@ class SzotarNet:
     def __init__(self):
         self.login_url = config.get("SzotarNet", "login_url")
         self.query_url = config.get("SzotarNet", "query_url")
-        self.session_file = config.get("SzotarNet", "session_path")
+        self.session_file = config.get("paths", "session_file")
         self.payload = {
             "email": config.get("SzotarNet", "email"),
             "password": config.get("SzotarNet", "password"),
@@ -30,6 +30,8 @@ class SzotarNet:
         # implement importing history later
 
     def save_session(self):
+        if not os.path.isfile(self.session_file):
+            os.makedirs(config.get("paths", "share_dir"))
         with open(self.session_file, "wb") as f:
             pickle.dump(self.s, f)
 

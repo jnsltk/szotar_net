@@ -1,6 +1,14 @@
+import os
 import re
+import sys
+
 from termcolor import colored, cprint
 from szotar_net.colours import COLOURS
+
+dirname = os.path.dirname(__file__)
+print(dirname)
+print(os.path.realpath(os.path.join(dirname, '..')))
+print(sys.prefix)
 
 while True:
     roman = input("enter roman num ")

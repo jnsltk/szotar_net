@@ -57,7 +57,7 @@ class App:
 
         config.set('SzotarNet', 'email', email)
         config.set('SzotarNet', 'password', password)
-        with open("etc/szotar_net/config.ini", "w") as configfile:
+        with open(config.get("paths", "config_file"), "w") as configfile:
             config.write(configfile)
 
     def end(self):
