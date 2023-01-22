@@ -1,5 +1,6 @@
 etc/szotar_net/session.pkl
 etc/szotar_net/config.ini
+credentials.py
 
 # OS generated files #
 ######################

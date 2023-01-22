@@ -13,15 +13,15 @@ szotar_net is a terminal-based client for the Chinese-Hungarian dictionary provi
 
 ## Installation
 
-To install szotar_net on your Mac (Windows/Linux currently untested, but it might work) you need to have python 3 and pip installed. You can get both of them via homebrew from the terminal: (if you don't have homebrew, you can get it [here](https://brew.sh/))
+To install szotar_net on your Mac (Windows/Linux currently untested, but it might work) you need to have ```python3``` and ```pip``` installed. You can get both of them via ```homebrew``` from the terminal: (if you don't have homebrew, you can get it [here](https://brew.sh/))
 ```shell
 brew install python3
 ```
-Then go to releases, and download the latest release file. It should be called something like "szotar_net-0.0.*.tar.gz"
+Then go to releases, and download the latest release file. The current version is called ```szotar_net-0.0.1.tar.gz```
 
 You can install it with pip:
 ```shell
-pip install dist/szotar_net-0.0.*.tar.gz
+pip install /path/to/file/szotar_net-0.0.1.tar.gz
 ```
 
 To run the app, in your terminal type:
