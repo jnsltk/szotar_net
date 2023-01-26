@@ -14,8 +14,6 @@ szotar_net is a command line based client for the Chinese-Hungarian dictionary p
 - [ ] History/cache (might be illegal, so maybe not)
 - [ ] Favourites (??)
 - [ ] TTS
-- [ ] Build a package, make it installable via pip or something
-  - [ ] Cross-platform? (probably only unix based oses)
 - [ ] Localisation
   - [ ] Chinese-language interface (Both Traditional and Simplified)
   - [ ] English interface

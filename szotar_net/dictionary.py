@@ -81,7 +81,7 @@ class SzotarNet:
         roman_num = ""
 
         # There are seemingly three possibilities:
-        # 1. If the entry is simple, only has one sense, then it is in the same line as the pinyin with example underneath
+        # 1. If the entry is simple, has one sense, then it is in the same line as the pinyin with example underneath
         # 2. If the entry has more than one sense, then there are arabic numerals, and they start in the next line
         # 3. If the entry has different meanings that have different part of speech then there are roman numerals
 

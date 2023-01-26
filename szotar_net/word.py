@@ -4,7 +4,6 @@ from dragonmapper import transcriptions
 
 from szotar_net import colours, config, common
 
-
 superscript = ["\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075", "\u2076", "\u2077", "\u2078", "\u2079"]
 
 
@@ -55,7 +54,6 @@ class Entry:
         cszo_str = common.zh_text_colour(cszo_str)
         alt_hanzi = "〔" + common.zh_text_colour(alt_hanzi) + "〕"
 
-        index_str = ""
         if self.index:
             index_str = self.index + " "
             cszo_str = "【" + cszo_str + index_str + "】"
@@ -84,9 +82,7 @@ class Entry:
         for c in self.content:
             content_str += c.__str__()
 
-        return cszo_str + alt_hanzi + cszo_variant_str + pron + content_str  + "\n\n"
-
-
+        return cszo_str + alt_hanzi + cszo_variant_str + pron + content_str + "\n\n"
 
 
 class SzofajSzint:
@@ -139,8 +135,6 @@ class SzofajSzint:
                 return "\n" + rom_str + szofaj_str + sense_str
 
         return ""
-
-
 
 
 class Sense:
@@ -202,6 +196,3 @@ class Pelda:
                 return "   " + line + zh_text + line + pron + line + self.hun_text
             return "   " + line + zh_text + line + self.hun_text
         return
-
-
-
